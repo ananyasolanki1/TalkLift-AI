@@ -73,7 +73,12 @@ export function AudioRecorder({ onAudioReady, isProcessing }: AudioRecorderProps
         setVisualizerBars(prev => prev.map(() => Math.random() * 40 + 10));
       }, 100);
     } else {
-      setVisualizerBars(new Array(12).fill(10));
+      // Small check to avoid synchronous setState inside effect warning
+      setVisualizerBars(prev => {
+        const defaultBars = new Array(12).fill(10);
+        if (JSON.stringify(prev) === JSON.stringify(defaultBars)) return prev;
+        return defaultBars;
+      });
     }
     return () => clearInterval(interval);
   }, [isRecording]);

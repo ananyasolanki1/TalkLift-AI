@@ -94,7 +94,7 @@ export function HistoryList() {
                                         <span className="text-[10px] uppercase tracking-widest text-slate-500 font-bold">{formatPrettyDate(item.date)}</span>
                                     </div>
                                     <p className="text-slate-300 truncate font-medium">
-                                        "{item.original_text || item.originalText}"
+                                        &quot;{item.original_text || item.originalText}&quot;
                                     </p>
                                 </div>
                                 <div className="flex items-center gap-3 shrink-0">
