@@ -8,7 +8,7 @@ import { TranscriptionView } from "@/components/TranscriptionView";
 import { HistoryList } from "@/components/HistoryList";
 import { supabase } from "@/lib/supabase";
 import { Auth } from "@/components/Auth";
-import { LogOut, Sparkles, Mic2, FileText, User, HelpCircle, CheckCircle2, Zap, Lock } from "lucide-react";
+import { LogOut, Sparkles, Mic2, FileText, User, HelpCircle, CheckCircle2, Zap, Lock, Target, TrendingUp, FileDown } from "lucide-react";
 import { twMerge } from "tailwind-merge";
 import { formatPrettyDate } from "@/lib/utils";
 
@@ -21,6 +21,7 @@ export default function Home() {
   const [currentView, setCurrentView] = useState<'home' | 'history'>('home');
   const [inputMode, setInputMode] = useState<'audio' | 'text'>('audio');
   const [manualText, setManualText] = useState("");
+  const [resetKey, setResetKey] = useState(0);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -156,7 +157,7 @@ export default function Home() {
               {/* Recorder Section */}
               <div className={transcribedText ? "hidden" : "block"}>
                 {inputMode === 'audio' ? (
-                  <AudioRecorder onAudioReady={handleAudioReady} isProcessing={isProcessing} />
+                  <AudioRecorder key={resetKey} onAudioReady={handleAudioReady} isProcessing={isProcessing} />
                 ) : (
                   <motion.div
                     initial={{ opacity: 0, y: 10 }}
@@ -222,6 +223,7 @@ export default function Home() {
                     onReset={() => {
                       setTranscribedText("");
                       setManualText("");
+                      setResetKey(prev => prev + 1);
                     }}
                     onRequireAuth={() => setShowAuth(true)}
                   />
@@ -237,12 +239,24 @@ export default function Home() {
                   </div>
                   <div className="grid md:grid-cols-3 gap-6">
                     {[
-                      { title: "Completely Free", desc: "No subscriptions or hidden costs. Professional coaching for everyone.", icon: Sparkles },
-                      { title: "Instant Analysis", desc: "Get grammar checks and tone suggestions in seconds with powerful AI.", icon: Zap },
-                      { title: "Privacy First", desc: "Your audio and texts are processed securely and never shared.", icon: Lock }
+                      {
+                        title: "Smart Grammar Fixes",
+                        desc: "Clear, native-level explanations for every fix to help you learn faster.",
+                        icon: CheckCircle2
+                      },
+                      {
+                        title: "Built for Speech",
+                        desc: "Optimized for natural talk. Turn voice into polished English instantly.",
+                        icon: Mic2
+                      },
+                      {
+                        title: "Session Reports",
+                        desc: "Keep track of your wins with simple PDF summaries of your sessions.",
+                        icon: FileDown
+                      }
                     ].map((item, i) => (
-                      <div key={i} className="p-6 rounded-2xl bg-slate-900/40 border border-slate-800/50 hover:border-purple-500/30 transition-all">
-                        <item.icon className="w-6 h-6 text-purple-400 mb-4" />
+                      <div key={i} className="p-6 rounded-2xl bg-slate-900/40 border border-slate-800/50 hover:border-purple-500/30 transition-all group">
+                        <item.icon className="w-6 h-6 text-purple-400 mb-4 group-hover:scale-110 transition-transform" />
                         <h3 className="text-lg font-bold text-slate-100 mb-2">{item.title}</h3>
                         <p className="text-slate-400 text-sm leading-relaxed">{item.desc}</p>
                       </div>

@@ -8,8 +8,8 @@ export async function POST(request: Request) {
         const formData = await request.formData();
         const file = formData.get('file') as File;
 
-        if (!file) {
-            return NextResponse.json({ error: 'No file provided' }, { status: 400 });
+        if (!file || typeof file === 'string') {
+            return NextResponse.json({ error: 'No audio file provided' }, { status: 400 });
         }
 
         if (!process.env.GOOGLE_API_KEY) {
@@ -21,7 +21,7 @@ export async function POST(request: Request) {
         const buffer = Buffer.from(bytes);
         const base64Audio = buffer.toString('base64');
 
-        const model = genAI.getGenerativeModel({ model: "gemini-flash-latest" });
+        const model = genAI.getGenerativeModel({ model: "gemini-flash-lite-latest" });
 
         const result = await model.generateContent([
             {

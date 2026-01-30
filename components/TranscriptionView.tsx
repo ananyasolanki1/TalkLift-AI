@@ -214,18 +214,25 @@ export function TranscriptionView({ originalText, onRequireAuth, onReset }: Tran
                                 <h4 className="text-red-400 font-semibold mb-4 flex items-center gap-2">
                                     Original Text
                                 </h4>
-                                <p className="text-lg text-slate-200 leading-relaxed">
-                                    {(grammarResult.mistakes && grammarResult.mistakes.length > 0)
-                                        ? originalText.split(new RegExp(`(${grammarResult.mistakes.map((m: any) => m.original.replace(/[.*+?^${}()|[\\]\\\\]/g, '\\\\$&')).join('|')})`, 'gi')).map((part: string, i: number) => {
-                                            const isMistake = grammarResult.mistakes.some((m: any) => m.original.toLowerCase() === part.toLowerCase());
-                                            return isMistake ? (
-                                                <span key={i} className="text-slate-200 decoration-red-500 underline decoration-2 underline-offset-4 decoration-wavy bg-red-500/10 rounded px-0.5">{part}</span>
-                                            ) : (
-                                                <span key={i}>{part}</span>
-                                            );
-                                        })
-                                        : originalText
-                                    }
+                                <p className="text-lg text-slate-200 leading-relaxed font-light">
+                                    {(() => {
+                                        const mistakes = grammarResult.mistakes || [];
+                                        const realMistakes = mistakes.filter(m => m.original.toLowerCase() !== m.correction.toLowerCase());
+                                        if (realMistakes.length === 0) return originalText;
+
+                                        const pattern = realMistakes
+                                            .sort((a, b) => b.original.length - a.original.length)
+                                            .map(m => m.original.replace(/[.*+?^${}()|[\\]\\]/g, '\\$&'))
+                                            .join('|');
+
+                                        const regex = new RegExp(`\\b(${pattern})\\b`, 'gi');
+                                        return originalText.split(regex).map((part, i) => {
+                                            const mistake = realMistakes.find(m => m.original.toLowerCase() === part.toLowerCase());
+                                            return mistake ? (
+                                                <span key={i} className="text-red-400 underline decoration-wavy decoration-red-500/50 decoration-2 underline-offset-4">{part}</span>
+                                            ) : <span key={i}>{part}</span>;
+                                        });
+                                    })()}
                                 </p>
                             </div>
 
@@ -234,18 +241,25 @@ export function TranscriptionView({ originalText, onRequireAuth, onReset }: Tran
                                 <h4 className="text-green-400 font-semibold mb-4 flex items-center gap-2">
                                     <CheckCircle2 className="w-5 h-5" /> Corrected Version
                                 </h4>
-                                <p className="text-lg text-slate-200 leading-relaxed">
-                                    {(grammarResult.mistakes && grammarResult.mistakes.length > 0)
-                                        ? grammarResult.correctedText.split(new RegExp(`(${grammarResult.mistakes.map((m: any) => m.correction.replace(/[.*+?^${}()|[\\]\\\\]/g, '\\\\$&')).join('|')})`, 'gi')).map((part: string, i: number) => {
-                                            const isCorrection = grammarResult.mistakes.some((m: any) => m.correction.toLowerCase() === part.toLowerCase());
-                                            return isCorrection ? (
-                                                <span key={i} className="text-slate-200 decoration-green-500 underline decoration-2 underline-offset-4 decoration-wavy bg-green-500/10 rounded px-0.5">{part}</span>
-                                            ) : (
-                                                <span key={i}>{part}</span>
-                                            );
-                                        })
-                                        : grammarResult.correctedText
-                                    }
+                                <p className="text-lg text-slate-200 leading-relaxed font-normal">
+                                    {(() => {
+                                        const mistakes = grammarResult.mistakes || [];
+                                        const realMistakes = mistakes.filter(m => m.original.toLowerCase() !== m.correction.toLowerCase());
+                                        if (realMistakes.length === 0) return grammarResult.correctedText;
+
+                                        const pattern = realMistakes
+                                            .sort((a, b) => b.correction.length - a.correction.length)
+                                            .map(m => m.correction.replace(/[.*+?^${}()|[\\]\\]/g, '\\$&'))
+                                            .join('|');
+
+                                        const regex = new RegExp(`\\b(${pattern})\\b`, 'gi');
+                                        return grammarResult.correctedText.split(regex).map((part, i) => {
+                                            const isMatch = realMistakes.some(m => m.correction.toLowerCase() === part.toLowerCase());
+                                            return isMatch ? (
+                                                <span key={i} className="text-green-400 underline decoration-wavy decoration-green-500/50 decoration-2 underline-offset-4 font-medium">{part}</span>
+                                            ) : <span key={i}>{part}</span>;
+                                        });
+                                    })()}
                                 </p>
                             </div>
                         </div>
@@ -255,22 +269,30 @@ export function TranscriptionView({ originalText, onRequireAuth, onReset }: Tran
                             <h4 className="text-amber-400 font-semibold mb-4 flex items-center gap-2">
                                 <RefreshCw className="w-5 h-5" /> Detailed Analysis
                             </h4>
-                            {(!grammarResult.mistakes || grammarResult.mistakes.length === 0) ? (
-                                <p className="text-slate-400 italic">No grammatical errors found! Great job.</p>
-                            ) : (
-                                <ul className="grid md:grid-cols-2 gap-4">
-                                    {grammarResult.mistakes.map((m: any, i: number) => (
-                                        <li key={i} className="bg-amber-900/10 border border-amber-900/20 p-3 rounded-lg flex flex-col justify-center">
-                                            <div className="flex flex-wrap items-center gap-2 mb-1">
-                                                <span className="text-red-400 line-through text-md font-medium decoration-red-500/50">{m.original}</span>
-                                                <ArrowRight className="w-4 h-4 text-slate-500 shrink-0" />
-                                                <span className="text-green-400 text-md font-medium">{m.correction}</span>
-                                            </div>
-                                            <p className="text-slate-400 text-sm mt-1">{m.explanation}</p>
-                                        </li>
-                                    ))}
-                                </ul>
-                            )}
+                            {(() => {
+                                const realMistakes = (grammarResult.mistakes || []).filter((m: any) =>
+                                    m.original.toLowerCase().trim() !== m.correction.toLowerCase().trim()
+                                );
+
+                                if (realMistakes.length === 0) {
+                                    return <p className="text-slate-400 italic">No grammatical errors found! Great job.</p>;
+                                }
+
+                                return (
+                                    <ul className="grid md:grid-cols-2 gap-4">
+                                        {realMistakes.map((m: any, i: number) => (
+                                            <li key={i} className="bg-amber-900/10 border border-amber-900/20 p-3 rounded-lg flex flex-col justify-center">
+                                                <div className="flex flex-wrap items-center gap-2 mb-1">
+                                                    <span className="text-red-400 line-through text-md font-medium decoration-red-500/50">{m.original}</span>
+                                                    <ArrowRight className="w-4 h-4 text-slate-500 shrink-0" />
+                                                    <span className="text-green-400 text-md font-medium">{m.correction}</span>
+                                                </div>
+                                                <p className="text-slate-400 text-sm mt-1">{m.explanation}</p>
+                                            </li>
+                                        ))}
+                                    </ul>
+                                );
+                            })()}
                         </div>
                     </motion.div>
                 )}
