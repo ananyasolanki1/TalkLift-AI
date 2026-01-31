@@ -1,0 +1,56 @@
+<svg width="512" height="512" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#06b6d4;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#3b82f6;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#a855f7;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+
+  <!-- 
+    GRID LOGIC: 512x512 Canvas. Center is (256, 256).
+    Bubble Body: Width 384 (64 to 448). Height 320 (96 to 416).
+  -->
+
+  <!-- 1. The Outline Bubble -->
+  <path d="
+    M 128 96 
+    H 384 
+    A 64 64 0 0 1 448 160 
+    V 352 
+    A 64 64 0 0 1 384 416 
+    H 160 
+    L 64 480 
+    L 85 390 
+    A 64 64 0 0 1 64 352 
+    V 160 
+    A 64 64 0 0 1 128 96 
+    Z" 
+    fill="none" stroke="url(#grad)" stroke-width="40" stroke-linecap="round" stroke-linejoin="round" />
+
+  <!-- 2. The Sound Waves (Centered at X=256, Y=256) -->
+  <!-- 5 Bars. Width 24. Gap 24 (Space between edges). Pitch = 48. -->
+  <!-- Positions: 
+       Center: 256 - 12 = 244
+       Left 1: 244 - 48 = 196
+       Left 2: 196 - 48 = 148
+       Right 1: 244 + 48 = 292
+       Right 2: 292 + 48 = 340
+  -->
+  
+  <!-- Left Outer -->
+  <rect x="148" y="236" width="24" height="40" rx="12" fill="url(#grad)" />
+  <!-- Left Inner -->
+  <rect x="196" y="206" width="24" height="100" rx="12" fill="url(#grad)" />
+  <!-- CENTER -->
+  <rect x="244" y="156" width="24" height="200" rx="12" fill="url(#grad)" />
+  <!-- Right Inner -->
+  <rect x="292" y="206" width="24" height="100" rx="12" fill="url(#grad)" />
+  <!-- Right Outer -->
+  <rect x="340" y="236" width="24" height="40" rx="12" fill="url(#grad)" />
+
+  <!-- 3. Sparkle (Top Right Corner) -->
+  <!-- Center at (460, 60) -->
+  <path d="M 460 20 L 475 60 L 515 75 L 475 90 L 460 130 L 445 90 L 405 75 L 445 60 Z" fill="#06b6d4" />
+
+</svg>
